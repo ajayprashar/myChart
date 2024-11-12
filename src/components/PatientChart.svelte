@@ -149,7 +149,10 @@
       {#each ['demographics', 'labs', 'vitals'] as tab}
         <button
           type="button"
-          class="px-4 py-2 rounded-t-lg flex items-center gap-2 {activeTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200'}"
+          class="px-4 py-2 rounded-t-lg flex items-center gap-2 transition-colors
+            {activeTab === tab ? 
+              'bg-primary text-white shadow-lg' : 
+              'bg-gray-100 hover:bg-gray-200 text-gray-700'}"
           on:click={() => activeTab = tab}
         >
           <span>
@@ -172,14 +175,14 @@
 
   <!-- Tab Content -->
   {#key activeTab}
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
       {#if activeTab === 'demographics'}
         {#if loading.patient}
           <p>Loading patient data...</p>
         {:else if error}
           <p class="text-red-500">{error}</p>
         {:else if patient}
-          <h2 class="text-xl font-semibold mb-4">Patient Demographics</h2>
+          <h2 class="text-xl font-semibold mb-4 text-primary">Patient Demographics</h2>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <p class="font-medium">Name:</p>
@@ -211,123 +214,97 @@
               {/if}
             </div>
           </div>
+
+          <!-- Demographics Debug Info -->
+          <details class="mt-4">
+            <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
+            <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
+              {JSON.stringify(patient, null, 2)}
+            </pre>
+          </details>
         {/if}
       {:else if activeTab === 'labs'}
-        <div class="bg-white rounded-lg shadow p-6">
-          {#if loading.labs}
-            <div class="flex items-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-blue-500" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-              </svg>
-              <p>Loading laboratory results...</p>
-            </div>
-          {:else}
-            <h2 class="text-xl font-semibold mb-4">Laboratory Results</h2>
-            <div class="space-y-4">
-              {#if labResults.length > 0}
-                {#each labResults as result}
-                  {@const display = result?.code?.coding?.[0]?.display || 'Unknown Test'}
-                  {@const value = result?.valueQuantity?.value}
-                  {@const unit = result?.valueQuantity?.unit}
-                  {@const date = result?.effectiveDateTime}
-                  
-                  <div class="border-b pb-2">
-                    <p class="font-medium">{display}</p>
-                    {#if value !== undefined && unit}
-                      <p>
-                        Value: {value} {unit}
-                        {#if date}
-                          <span class="text-gray-500 text-sm">
-                            ({new Date(date).toLocaleDateString()})
-                          </span>
-                        {/if}
-                      </p>
-                    {:else}
-                      <p class="text-gray-500">No value recorded</p>
-                    {/if}
-                  </div>
-                {/each}
-
-                <!-- Debug output -->
-                <details class="mt-4">
-                  <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
-                  <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
-                    {JSON.stringify(labResults, null, 2)}
-                  </pre>
-                </details>
-              {:else}
-                <div class="text-gray-600">
-                  <p>No laboratory results found.</p>
-                  <p class="text-sm mt-2">Debug info:</p>
-                  <pre class="bg-gray-100 p-2 rounded text-xs mt-1">
-                    Patient ID: {patientId}
-                    Loading state: {loading.labs}
-                    Results count: {labResults.length}
-                  </pre>
+        <h2 class="text-xl font-semibold mb-4 text-primary">Laboratory Results</h2>
+        {#if loading.labs}
+          <p>Loading lab results...</p>
+        {:else}
+          <div class="space-y-4">
+            {#if labResults.length > 0}
+              {#each labResults as result}
+                <div class="border-b border-gray-200 pb-4 mb-4 hover:bg-gray-50 rounded p-2">
+                  <p class="font-medium text-secondary">{result?.code?.coding?.[0]?.display || 'Unknown Test'}</p>
+                  {#if result?.valueQuantity?.value !== undefined && result?.valueQuantity?.unit}
+                    <p>
+                      Value: {result?.valueQuantity?.value} {result?.valueQuantity?.unit}
+                      {#if result?.effectiveDateTime}
+                        <span class="text-gray-500 text-sm">
+                          ({new Date(result?.effectiveDateTime).toLocaleDateString()})
+                        </span>
+                      {/if}
+                    </p>
+                  {:else}
+                    <p class="text-gray-500">No value recorded</p>
+                  {/if}
                 </div>
-              {/if}
-            </div>
-          {/if}
-        </div>
+              {/each}
+            {:else}
+              <p>No laboratory results found.</p>
+            {/if}
+
+            <!-- Labs Debug Info -->
+            <details class="mt-4">
+              <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
+              <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
+                Patient ID: {patientId}
+                Loading state: {loading.labs}
+                Results count: {labResults.length}
+                Raw data:
+                {JSON.stringify(labResults, null, 2)}
+              </pre>
+            </details>
+          </div>
+        {/if}
       {:else if activeTab === 'vitals'}
-        <div class="bg-white rounded-lg shadow p-6">
-          {#if loading.vitals}
-            <div class="flex items-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-blue-500" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-              </svg>
-              <p>Loading vital signs...</p>
-            </div>
-          {:else}
-            <h2 class="text-xl font-semibold mb-4">Vital Signs</h2>
-            <div class="space-y-4">
-              {#if vitalSigns.length > 0}
-                {#each vitalSigns as vital}
-                  {@const display = vital?.code?.coding?.[0]?.display || 'Unknown Vital Sign'}
-                  {@const value = vital?.valueQuantity?.value}
-                  {@const unit = vital?.valueQuantity?.unit}
-                  {@const date = vital?.effectiveDateTime}
-
-                  <div class="border-b pb-2">
-                    <p class="font-medium">{display}</p>
-                    {#if value !== undefined && unit}
-                      <p>
-                        Value: {value} {unit}
-                        {#if date}
-                          <span class="text-gray-500 text-sm">
-                            ({new Date(date).toLocaleDateString()})
-                          </span>
-                        {/if}
-                      </p>
-                    {:else}
-                      <p class="text-gray-500">No value recorded</p>
-                    {/if}
-                  </div>
-                {/each}
-
-                <!-- Debug output -->
-                <details class="mt-4">
-                  <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
-                  <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
-                    {JSON.stringify(vitalSigns, null, 2)}
-                  </pre>
-                </details>
-              {:else}
-                <div class="text-gray-600">
-                  <p>No vital signs available</p>
-                  <p class="text-sm mt-2">Debug info:</p>
-                  <pre class="bg-gray-100 p-2 rounded text-xs mt-1">
-                    Patient ID: {patientId}
-                    Loading state: {loading.vitals}
-                    Results count: {vitalSigns.length}
-                  </pre>
+        <h2 class="text-xl font-semibold mb-4 text-primary">Vital Signs</h2>
+        {#if loading.vitals}
+          <p>Loading vital signs...</p>
+        {:else}
+          <div class="space-y-4">
+            {#if vitalSigns.length > 0}
+              {#each vitalSigns as vital}
+                <div class="border-b border-gray-200 pb-4 mb-4 hover:bg-gray-50 rounded p-2">
+                  <p class="font-medium text-accent">{vital?.code?.coding?.[0]?.display || 'Unknown Vital'}</p>
+                  {#if vital?.valueQuantity?.value !== undefined && vital?.valueQuantity?.unit}
+                    <p>
+                      Value: {vital?.valueQuantity?.value} {vital?.valueQuantity?.unit}
+                      {#if vital?.effectiveDateTime}
+                        <span class="text-gray-500 text-sm">
+                          ({new Date(vital?.effectiveDateTime).toLocaleDateString()})
+                        </span>
+                      {/if}
+                    </p>
+                  {:else}
+                    <p class="text-gray-500">No value recorded</p>
+                  {/if}
                 </div>
-              {/if}
-            </div>
-          {/if}
-        </div>
+              {/each}
+            {:else}
+              <p>No vital signs available</p>
+            {/if}
+
+            <!-- Vitals Debug Info -->
+            <details class="mt-4">
+              <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
+              <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
+                Patient ID: {patientId}
+                Loading state: {loading.vitals}
+                Results count: {vitalSigns.length}
+                Raw data:
+                {JSON.stringify(vitalSigns, null, 2)}
+              </pre>
+            </details>
+          </div>
+        {/if}
       {/if}
     </div>
   {/key}

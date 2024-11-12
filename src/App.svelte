@@ -104,7 +104,7 @@
     <div class="flex justify-center items-center h-screen">
       <div class="flex flex-col items-center gap-4">
         <button
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded shadow-lg transition-colors"
           on:click={initiateLogin}
         >
           Connect to EPIC
