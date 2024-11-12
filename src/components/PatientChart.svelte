@@ -106,7 +106,7 @@
   async function fetchVitalSigns() {
     try {
       const response = await fetch(
-        `${FHIR_BASE_URL}Observation?category=vital-signs&patient=${patientId}`, {
+        `${FHIR_BASE_URL}Observation?category=vital-signs&patient=${patientId}&_sort=code,-date`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Accept': 'application/json'
@@ -117,6 +117,7 @@
       if (!response.ok) throw new Error(`Failed to fetch vital signs: ${response.status}`);
       const data = await response.json();
       vitalSigns = data.entry?.map((e: any) => e.resource) || [];
+      console.log('Sorted vital signs:', vitalSigns);
     } catch (e) {
       console.error('Error fetching vital signs:', e);
     } finally {
@@ -271,23 +272,51 @@
         {:else}
           <div class="space-y-4">
             {#if vitalSigns.length > 0}
-              {#each vitalSigns as vital}
-                <div class="border-b border-gray-200 pb-4 mb-4 hover:bg-gray-50 rounded p-2">
-                  <p class="font-medium text-accent">{vital?.code?.coding?.[0]?.display || 'Unknown Vital'}</p>
-                  {#if vital?.valueQuantity?.value !== undefined && vital?.valueQuantity?.unit}
-                    <p>
-                      Value: {vital?.valueQuantity?.value} {vital?.valueQuantity?.unit}
-                      {#if vital?.effectiveDateTime}
-                        <span class="text-gray-500 text-sm">
-                          ({new Date(vital?.effectiveDateTime).toLocaleDateString()})
-                        </span>
-                      {/if}
-                    </p>
-                  {:else}
-                    <p class="text-gray-500">No value recorded</p>
-                  {/if}
-                </div>
-              {/each}
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Vital Sign
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Value
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Unit
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    {#each vitalSigns as vital}
+                      {@const display = vital?.code?.coding?.[0]?.display || 'Unknown Vital Sign'}
+                      {@const value = vital?.valueQuantity?.value}
+                      {@const unit = vital?.valueQuantity?.unit}
+                      {@const date = vital?.effectiveDateTime}
+
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm font-medium text-accent">{display}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900">{value ?? 'N/A'}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-500">{unit ?? 'N/A'}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-500">
+                            {date ? new Date(date).toLocaleDateString() : 'N/A'}
+                          </span>
+                        </td>
+                      </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </div>
             {:else}
               <p>No vital signs available</p>
             {/if}
