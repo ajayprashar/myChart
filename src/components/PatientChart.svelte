@@ -144,15 +144,44 @@
 </script>
 
 <div class="p-6">
+  <!-- Patient Context Header -->
+  {#if patient}
+    <div class="bg-white shadow-sm border-l-4 border-primary px-4 py-2 mb-4 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">Patient:</span>
+          <span class="font-medium">
+            {patient.name?.[0]?.given?.join(' ')} {patient.name?.[0]?.family}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">DOB:</span>
+          <span class="font-medium">
+            {new Date(patient.birthDate).toLocaleDateString()}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">Gender:</span>
+          <span class="font-medium capitalize">
+            {patient.gender || 'Unknown'}
+          </span>
+        </div>
+      </div>
+      <div class="text-sm text-gray-500">
+        MRN: {patientId}
+      </div>
+    </div>
+  {/if}
+
   <!-- Tab Navigation -->
-  <div class="border-b border-gray-200 mb-4">
+  <div class="border-b-2 border-primary mb-4">
     <nav class="flex gap-4">
       {#each ['demographics', 'labs', 'vitals'] as tab}
         <button
           type="button"
           class="px-4 py-2 rounded-t-lg flex items-center gap-2 transition-colors
             {activeTab === tab ? 
-              'bg-primary text-white shadow-lg' : 
+              'bg-primary text-white shadow-accent' : 
               'bg-gray-100 hover:bg-gray-200 text-gray-700'}"
           on:click={() => activeTab = tab}
         >
@@ -220,6 +249,11 @@
           <details class="mt-4">
             <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
             <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
+              FHIR Query: ${FHIR_BASE_URL}Patient/${patientId}
+
+              Patient ID: {patientId}
+              Loading state: {loading.patient}
+              Raw data:
               {JSON.stringify(patient, null, 2)}
             </pre>
           </details>
@@ -256,6 +290,8 @@
             <details class="mt-4">
               <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
               <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
+                FHIR Query: ${FHIR_BASE_URL}Observation?category=laboratory&patient=${patientId}
+
                 Patient ID: {patientId}
                 Loading state: {loading.labs}
                 Results count: {labResults.length}
@@ -272,59 +308,70 @@
         {:else}
           <div class="space-y-4">
             {#if vitalSigns.length > 0}
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Vital Sign
-                      </th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Value
-                      </th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Unit
-                      </th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
-                    {#each vitalSigns as vital}
-                      {@const display = vital?.code?.coding?.[0]?.display || 'Unknown Vital Sign'}
-                      {@const value = vital?.valueQuantity?.value}
-                      {@const unit = vital?.valueQuantity?.unit}
-                      {@const date = vital?.effectiveDateTime}
+              {@const groupedVitals = vitalSigns.reduce((groups, vital) => {
+                const type = vital?.code?.coding?.[0]?.display || 'Unknown';
+                if (!groups[type]) groups[type] = [];
+                groups[type].push(vital);
+                return groups;
+              }, {})}
 
-                      <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="text-sm font-medium text-accent">{display}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="text-sm text-gray-900">{value ?? 'N/A'}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="text-sm text-gray-500">{unit ?? 'N/A'}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="text-sm text-gray-500">
-                            {date ? new Date(date).toLocaleDateString() : 'N/A'}
-                          </span>
-                        </td>
-                      </tr>
-                    {/each}
-                  </tbody>
-                </table>
+              <div class="grid grid-cols-2 gap-4">
+                {#each Object.entries(groupedVitals) as [vitalType, measurements]}
+                  <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-primary text-white px-4 py-2 text-sm font-medium">
+                      {vitalType}
+                    </div>
+                    <div class="max-h-[250px] overflow-y-auto">
+                      <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
+                          <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                              Value
+                            </th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                              Unit
+                            </th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                              Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                          {#each measurements as vital}
+                            {@const value = vital?.valueQuantity?.value}
+                            {@const unit = vital?.valueQuantity?.unit}
+                            {@const date = vital?.effectiveDateTime}
+
+                            <tr class="hover:bg-gray-50">
+                              <td class="px-4 py-1.5 whitespace-nowrap">
+                                <span class="text-sm text-gray-900">{value ?? 'N/A'}</span>
+                              </td>
+                              <td class="px-4 py-1.5 whitespace-nowrap">
+                                <span class="text-sm text-gray-500">{unit ?? 'N/A'}</span>
+                              </td>
+                              <td class="px-4 py-1.5 whitespace-nowrap">
+                                <span class="text-sm text-gray-500">
+                                  {date ? new Date(date).toLocaleDateString() : 'N/A'}
+                                </span>
+                              </td>
+                            </tr>
+                          {/each}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                {/each}
               </div>
             {:else}
               <p>No vital signs available</p>
             {/if}
 
-            <!-- Vitals Debug Info -->
+            <!-- Debug Info -->
             <details class="mt-4">
               <summary class="text-sm text-gray-500 cursor-pointer">Debug Information</summary>
               <pre class="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
+                FHIR Query: ${FHIR_BASE_URL}Observation?category=vital-signs&patient=${patientId}&_sort=code,-date
+
                 Patient ID: {patientId}
                 Loading state: {loading.vitals}
                 Results count: {vitalSigns.length}
