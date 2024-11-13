@@ -117,7 +117,7 @@
     <PatientChart {accessToken} {patientId} />
   {:else}
     <div class="flex justify-center items-center h-screen">
-      <div class="flex flex-col items-center gap-4">
+      <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
         {#if authError}
           <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
             <p class="font-bold">Authentication Error</p>
@@ -125,12 +125,57 @@
             <p class="text-sm">Redirecting to login...</p>
           </div>
         {:else}
-          <button
-            class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded shadow-lg transition-colors"
-            on:click={initiateLogin}
-          >
-            Connect to EPIC
-          </button>
+          <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-primary mb-2 whitespace-pre-line">
+              Connect to Your
+              Health System
+            </h1>
+            <p class="text-gray-600">Select a health system to view your medical records</p>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Epic Health System -->
+            <button
+              class="w-full bg-secondary text-white hover:bg-secondary-hover border-2 border-accent text-left px-6 py-4 rounded-lg shadow-md transition-all hover:shadow-lg group"
+              on:click={initiateLogin}
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="text-lg font-medium">Epic Systems</h2>
+                  <p class="text-gray-100">Connect to Epic's FHIR sandbox</p>
+                </div>
+                <svg 
+                  class="h-5 w-5 text-accent transition-transform group-hover:translate-x-1" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 20 20" 
+                  fill="currentColor"
+                >
+                  <path 
+                    fill-rule="evenodd" 
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" 
+                    clip-rule="evenodd" 
+                  />
+                </svg>
+              </div>
+            </button>
+
+            <!-- Placeholder for future health systems -->
+            <div class="w-full bg-gray-50 border border-gray-200 px-6 py-4 rounded-lg">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="text-lg font-medium text-gray-400">More Systems Coming Soon</h2>
+                  <p class="text-sm text-gray-400">Additional health systems will be added</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Optional: Add a decorative accent line -->
+          <div class="mt-8 pt-6 border-t border-gray-200">
+            <p class="text-center text-sm text-gray-500">
+              Choose your healthcare provider to securely access your medical records
+            </p>
+          </div>
         {/if}
       </div>
     </div>

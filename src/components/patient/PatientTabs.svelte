@@ -93,16 +93,31 @@
       {/each}
     </div>
     
-    <!-- Logout Button -->
-    <button
-      type="button"
-      class="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary-hover transition-colors flex items-center gap-2"
-      on:click={handleLogout}
-    >
-      <span>Logout</span>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-      </svg>
-    </button>
+    <!-- Action Buttons -->
+    <div class="flex gap-2">
+      <!-- Switch Health System Button -->
+      <button
+        type="button"
+        class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-hover transition-colors flex items-center gap-2"
+        on:click={() => window.location.href = '/'}
+      >
+        <span>Switch System</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg>
+      </button>
+
+      <!-- Logout Button -->
+      <button
+        type="button"
+        class="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary-hover transition-colors flex items-center gap-2"
+        on:click={handleLogout}
+      >
+        <span>Logout</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
