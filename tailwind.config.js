@@ -22,6 +22,14 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addBase }) {
+      addBase({
+        'summary::-webkit-details-marker': {
+          display: 'none'
+        }
+      })
+    }
+  ],
 }
 
