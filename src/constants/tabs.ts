@@ -16,6 +16,12 @@ export const PATIENT_TABS = [
     label: 'Vital Signs',
     icon: 'heart',
     description: 'View patient vital signs'
+  },
+  { 
+    id: 'medications', 
+    label: 'Medications',
+    icon: 'pills',
+    description: 'View patient medications'
   }
 ] as const;
 

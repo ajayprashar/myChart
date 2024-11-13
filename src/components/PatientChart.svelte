@@ -9,7 +9,8 @@
     labResultsStore, 
     vitalSignsStore, 
     loadingStore, 
-    errorStore 
+    errorStore, 
+    medicationsStore 
   } from '../stores/patient.store';
   
   import PatientHeader from './patient/PatientHeader.svelte';
@@ -17,6 +18,7 @@
   import DemographicsTab from './patient/tabs/DemographicsTab.svelte';
   import LabsTab from './patient/tabs/LabsTab.svelte';
   import VitalsTab from './patient/tabs/VitalsTab.svelte';
+  import MedicationsTab from './patient/tabs/MedicationsTab.svelte';
   import LoadingSpinner from './common/LoadingSpinner.svelte';
   import ErrorBoundary from './common/ErrorBoundary.svelte';
 
@@ -88,6 +90,19 @@
     }
   }
 
+  async function fetchMedications() {
+    loadingStore.update(state => ({ ...state, medications: true }));
+    try {
+      const data = await fhirService.getMedications(patientId);
+      medicationsStore.set(data.entry?.map(e => e.resource) ?? []);
+    } catch (error) {
+      errorStore.update(state => ({ ...state, medications: error as Error }));
+      console.error('Error fetching medications:', error);
+    } finally {
+      loadingStore.update(state => ({ ...state, medications: false }));
+    }
+  }
+
   // Function to handle tab changes
   function handleTabChange(newTab: TabId) {
     activeTab = newTab;
@@ -100,6 +115,9 @@
         break;
       case 'vitals':
         fetchVitalSigns();
+        break;
+      case 'medications':
+        fetchMedications();
         break;
     }
   }
@@ -159,6 +177,18 @@
         >
           <VitalsTab 
             vitalSigns={$vitalSignsStore} 
+            loading={$loadingStore} 
+            {patientId} 
+          />
+        </div>
+      {:else if activeTab === 'medications'}
+        <div 
+          role="tabpanel" 
+          id="medications-panel"
+          aria-labelledby="tab-medications"
+        >
+          <MedicationsTab 
+            medications={$medicationsStore} 
             loading={$loadingStore} 
             {patientId} 
           />

@@ -45,4 +45,27 @@ export interface Observation {
   };
   effectiveDateTime: string;
   status: string;
+}
+
+export interface MedicationRequest {
+  resourceType: 'MedicationRequest';
+  medicationCodeableConcept?: {
+    coding?: Array<{
+      display?: string;
+      code?: string;
+    }>;
+    text?: string;
+  };
+  status?: string;
+  authoredOn?: string;
+  dosageInstruction?: Array<{
+    text?: string;
+    timing?: {
+      repeat?: {
+        frequency?: number;
+        period?: number;
+        periodUnit?: string;
+      };
+    };
+  }>;
 } 

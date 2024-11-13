@@ -1,4 +1,4 @@
-import type { Patient, Observation, FHIRResponse } from '../types/fhir';
+import type { Patient, Observation, FHIRResponse, MedicationRequest } from '../types/fhir';
 
 export class FHIRService {
   constructor(private baseUrl: string, private accessToken: string) {}
@@ -38,6 +38,12 @@ export class FHIRService {
   async getVitalSigns(patientId: string): Promise<FHIRResponse<Observation>> {
     return this.fetchWithAuth<FHIRResponse<Observation>>(
       `Observation?category=vital-signs&patient=${patientId}&_sort=code,-date`
+    );
+  }
+
+  async getMedications(patientId: string): Promise<FHIRResponse<MedicationRequest>> {
+    return this.fetchWithAuth<FHIRResponse<MedicationRequest>>(
+      `MedicationRequest?patient=${patientId}`
     );
   }
 }
