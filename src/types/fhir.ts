@@ -1,3 +1,5 @@
+export type TabId = 'patient' | 'observations' | 'medications';
+
 export type LoadingState = {
   [K in TabId]: boolean;
 };
