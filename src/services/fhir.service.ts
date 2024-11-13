@@ -17,8 +17,11 @@ export class FHIRService {
       }
       
       return response.json();
-    } catch (error) {
-      throw new Error(`FHIR API request failed: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`FHIR API request failed: ${error.message}`);
+      }
+      throw new Error('FHIR API request failed: Unknown error');
     }
   }
 

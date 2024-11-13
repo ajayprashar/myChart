@@ -1,8 +1,6 @@
-export interface LoadingState {
-  patient: boolean;
-  labs: boolean;
-  vitals: boolean;
-}
+export type LoadingState = {
+  [K in TabId]: boolean;
+};
 
 export interface FHIRResponse<T> {
   resourceType: string;

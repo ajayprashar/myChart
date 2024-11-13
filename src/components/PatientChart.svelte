@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { fhir4 } from '@types/fhir';
   import { onMount } from 'svelte';
   import { FHIR_BASE_URL } from '../config';
   import { FHIRService } from '../services/fhir.service';
@@ -55,7 +56,7 @@
         .filter(resource => 
           resource && 
           resource.resourceType === 'Observation' && 
-          resource.category?.some(cat => 
+          (resource as fhir4.Observation).category?.some(cat => 
             cat.coding?.some(code => 
               code.code === 'laboratory' || 
               code.display?.toLowerCase().includes('laboratory')
