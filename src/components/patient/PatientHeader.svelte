@@ -1,7 +1,8 @@
 <script lang="ts">
+  import type { Patient } from '../../types/fhir';
   import { onDestroy } from 'svelte';
   
-  export let patient;
+  export let patient: Patient;
   export let patientId: string;
   
   let copySuccess = false;
@@ -34,7 +35,7 @@
     <div class="flex items-center gap-2">
       <span class="text-gray-500">DOB:</span>
       <span class="font-medium">
-        {new Date(patient.birthDate).toLocaleDateString()}
+        {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString() : 'Unknown'}
       </span>
     </div>
     <div class="flex items-center gap-2">

@@ -13,12 +13,14 @@ export class FHIRService {
       });
       
       if (!response.ok) {
-        throw new Error(`FHIR API error: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`FHIR API error: ${response.status} - ${errorText}`);
       }
       
       return response.json();
     } catch (error: unknown) {
       if (error instanceof Error) {
+        console.error('FHIR API request failed:', error);
         throw new Error(`FHIR API request failed: ${error.message}`);
       }
       throw new Error('FHIR API request failed: Unknown error');
