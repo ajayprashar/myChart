@@ -142,7 +142,10 @@
     <PatientTabs 
       bind:activeTab 
       on:tabChange={({ detail }) => handleTabChange(detail)}
-    />
+      let:loading
+    >
+      <LoadingSpinner size="sm" slot="loading-spinner"/>
+    </PatientTabs>
 
     <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
       {#if activeTab === 'demographics'}
@@ -158,41 +161,59 @@
           />
         </div>
       {:else if activeTab === 'labs'}
-        <div 
-          role="tabpanel" 
-          id="labs-panel"
-          aria-labelledby="tab-labs"
-        >
-          <LabsTab 
-            labResults={$labResultsStore} 
-            loading={$loadingStore} 
-            {patientId} 
-          />
-        </div>
+        {#if $loadingStore.labs}
+          <div class="flex justify-center py-8">
+            <LoadingSpinner size="lg" />
+          </div>
+        {:else}
+          <div 
+            role="tabpanel" 
+            id="labs-panel"
+            aria-labelledby="tab-labs"
+          >
+            <LabsTab 
+              labResults={$labResultsStore} 
+              loading={$loadingStore} 
+              {patientId} 
+            />
+          </div>
+        {/if}
       {:else if activeTab === 'vitals'}
-        <div 
-          role="tabpanel" 
-          id="vitals-panel"
-          aria-labelledby="tab-vitals"
-        >
-          <VitalsTab 
-            vitalSigns={$vitalSignsStore} 
-            loading={$loadingStore} 
-            {patientId} 
-          />
-        </div>
+        {#if $loadingStore.vitals}
+          <div class="flex justify-center py-8">
+            <LoadingSpinner size="lg" />
+          </div>
+        {:else}
+          <div 
+            role="tabpanel" 
+            id="vitals-panel"
+            aria-labelledby="tab-vitals"
+          >
+            <VitalsTab 
+              vitalSigns={$vitalSignsStore} 
+              loading={$loadingStore} 
+              {patientId} 
+            />
+          </div>
+        {/if}
       {:else if activeTab === 'medications'}
-        <div 
-          role="tabpanel" 
-          id="medications-panel"
-          aria-labelledby="tab-medications"
-        >
-          <MedicationsTab 
-            medications={$medicationsStore} 
-            loading={$loadingStore} 
-            {patientId} 
-          />
-        </div>
+        {#if $loadingStore.medications}
+          <div class="flex justify-center py-8">
+            <LoadingSpinner size="lg" />
+          </div>
+        {:else}
+          <div 
+            role="tabpanel" 
+            id="medications-panel"
+            aria-labelledby="tab-medications"
+          >
+            <MedicationsTab 
+              medications={$medicationsStore} 
+              loading={$loadingStore} 
+              {patientId} 
+            />
+          </div>
+        {/if}
       {/if}
     </div>
   </div>

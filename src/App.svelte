@@ -2,6 +2,10 @@
   import { CLIENT_ID, SMART_AUTH_URL, SMART_TOKEN_URL } from './config';
   import PatientChart from './components/PatientChart.svelte';
   import { onMount } from 'svelte';
+  import Footer from './components/common/Footer.svelte';
+  import { currentRoute } from './stores/route.store';
+  import About from './components/About.svelte';
+  import LoadingSpinner from './components/common/LoadingSpinner.svelte';
 
   let accessToken: string | null = null;
   let patientId: string | null = null;
@@ -106,78 +110,102 @@
     
     isLoading = false;
   });
+
+  // Handle route changes
+  function handleRouteChange() {
+    const path = window.location.pathname;
+    if (path === '/about') {
+      currentRoute.set('about');
+    } else {
+      currentRoute.set('main');
+    }
+  }
+
+  // Listen for route changes
+  onMount(() => {
+    handleRouteChange();
+    window.addEventListener('popstate', handleRouteChange);
+    return () => window.removeEventListener('popstate', handleRouteChange);
+  });
 </script>
 
-<div class="min-h-screen bg-gray-100">
-  {#if isLoading}
-    <div class="flex justify-center items-center h-screen">
-      <p>Loading...</p>
-    </div>
-  {:else if accessToken && patientId}
-    <PatientChart {accessToken} {patientId} />
-  {:else}
-    <div class="flex justify-center items-center h-screen">
-      <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
-        {#if authError}
-          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
-            <p class="font-bold">Authentication Error</p>
-            <p>{authError}</p>
-            <p class="text-sm">Redirecting to login...</p>
-          </div>
-        {:else}
-          <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-primary mb-2 whitespace-pre-line">
-              Connect to Your
-              Health System
-            </h1>
-            <p class="text-gray-600">Select a health system to view your medical records</p>
-          </div>
-          
-          <div class="space-y-4">
-            <!-- Epic Health System -->
-            <button
-              class="w-full bg-secondary text-white hover:bg-secondary-hover border-2 border-accent text-left px-6 py-4 rounded-lg shadow-md transition-all hover:shadow-lg group"
-              on:click={initiateLogin}
-            >
-              <div class="flex items-center justify-between">
-                <div>
-                  <h2 class="text-lg font-medium">Epic Systems</h2>
-                  <p class="text-gray-100">Connect to Epic's FHIR sandbox</p>
-                </div>
-                <svg 
-                  class="h-5 w-5 text-accent transition-transform group-hover:translate-x-1" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 20 20" 
-                  fill="currentColor"
+<div class="min-h-screen bg-gray-100 flex flex-col">
+  <div class="flex-grow">
+    {#if $currentRoute === 'about'}
+      <About />
+    {:else}
+      {#if isLoading}
+        <div class="flex justify-center items-center h-screen">
+          <LoadingSpinner size="lg" />
+        </div>
+      {:else if accessToken && patientId}
+        <PatientChart {accessToken} {patientId} />
+      {:else}
+        <div class="flex justify-center items-center h-screen">
+          <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
+            {#if authError}
+              <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
+                <p class="font-bold">Authentication Error</p>
+                <p>{authError}</p>
+                <p class="text-sm">Redirecting to login...</p>
+              </div>
+            {:else}
+              <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-primary mb-2 whitespace-pre-line">
+                  Connect to Your
+                  Health System
+                </h1>
+                <p class="text-gray-600">Select a health system to view your medical records</p>
+              </div>
+              
+              <div class="space-y-4">
+                <!-- Epic Health System -->
+                <button
+                  class="w-full bg-secondary text-white hover:bg-secondary-hover border-2 border-accent text-left px-6 py-4 rounded-lg shadow-md transition-all hover:shadow-lg group"
+                  on:click={initiateLogin}
                 >
-                  <path 
-                    fill-rule="evenodd" 
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" 
-                    clip-rule="evenodd" 
-                  />
-                </svg>
-              </div>
-            </button>
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h2 class="text-lg font-medium">Epic Systems</h2>
+                      <p class="text-gray-100">Connect to Epic's FHIR sandbox</p>
+                    </div>
+                    <svg 
+                      class="h-5 w-5 text-accent transition-transform group-hover:translate-x-1" 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 20 20" 
+                      fill="currentColor"
+                    >
+                      <path 
+                        fill-rule="evenodd" 
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" 
+                        clip-rule="evenodd" 
+                      />
+                    </svg>
+                  </div>
+                </button>
 
-            <!-- Placeholder for future health systems -->
-            <div class="w-full bg-gray-50 border border-gray-200 px-6 py-4 rounded-lg">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h2 class="text-lg font-medium text-gray-400">More Systems Coming Soon</h2>
-                  <p class="text-sm text-gray-400">Additional health systems will be added</p>
+                <!-- Placeholder for future health systems -->
+                <div class="w-full bg-gray-50 border border-gray-200 px-6 py-4 rounded-lg">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h2 class="text-lg font-medium text-gray-400">More Systems Coming Soon</h2>
+                      <p class="text-sm text-gray-400">Additional health systems will be added</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Optional: Add a decorative accent line -->
-          <div class="mt-8 pt-6 border-t border-gray-200">
-            <p class="text-center text-sm text-gray-500">
-              Choose your healthcare provider to securely access your medical records
-            </p>
+              <!-- Optional: Add a decorative accent line -->
+              <div class="mt-8 pt-6 border-t border-gray-200">
+                <p class="text-center text-sm text-gray-500">
+                  Choose your healthcare provider to securely access your medical records
+                </p>
+              </div>
+            {/if}
           </div>
-        {/if}
-      </div>
-    </div>
-  {/if}
+        </div>
+      {/if}
+    {/if}
+  </div>
+  <Footer />
 </div>

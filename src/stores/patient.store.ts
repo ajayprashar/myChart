@@ -23,3 +23,7 @@ export const errorStore = writable<Record<TabId, Error | null>>({
   vitals: null,
   medications: null
 });
+
+loadingStore.subscribe(value => {
+  console.log('Loading state changed:', value);
+});
