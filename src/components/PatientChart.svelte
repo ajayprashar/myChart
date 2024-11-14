@@ -141,8 +141,7 @@
     
     <PatientTabs 
       bind:activeTab 
-      on:tabChange={({ detail }) => handleTabChange(detail)}
-      let:loading
+      on:tabChange={e => handleTabChange(e.detail)}
     >
       <LoadingSpinner size="sm" slot="loading-spinner"/>
     </PatientTabs>
