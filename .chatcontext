@@ -1,3 +1,6 @@
+# Project Overview
+MyChart - A SMART on FHIR Patient Portal Application
+
 # Project Structure
 src/
   components/
@@ -13,11 +16,31 @@ src/
         LabsTab.svelte
         VitalsTab.svelte
         MedicationsTab.svelte
+      debug/
+        DebugPanel.svelte
   stores/
     patient.store.ts
     route.store.ts
+  services/
+    auth.service.ts
+    fhir.service.ts
+  types/
+    fhir.ts
+  constants/
+    tabs.ts
   App.svelte
   config.ts
+  main.ts
 
-# Key Files Content
-[Include main file contents here] 
+# Configuration Files
+postcss.config.js
+tsconfig.json
+tsconfig.node.json
+package.json
+vite.config.ts
+index.html
+tailwind.config.js
+
+# File Contents
+
+## src/App.svelte
