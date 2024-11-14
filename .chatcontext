@@ -1,0 +1,23 @@
+# Project Structure
+src/
+  components/
+    common/
+      Footer.svelte
+      LoadingSpinner.svelte
+      ErrorBoundary.svelte
+    patient/
+      PatientHeader.svelte
+      PatientTabs.svelte
+      tabs/
+        DemographicsTab.svelte
+        LabsTab.svelte
+        VitalsTab.svelte
+        MedicationsTab.svelte
+  stores/
+    patient.store.ts
+    route.store.ts
+  App.svelte
+  config.ts
+
+# Key Files Content
+[Include main file contents here] 
