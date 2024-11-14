@@ -1,8 +1,4 @@
-export type TabId = 'patient' | 'observations' | 'medications';
-
-export type LoadingState = {
-  [K in TabId]: boolean;
-};
+export type LoadingState = Record<TabId, boolean>;
 
 export interface FHIRResponse<T> {
   resourceType: string;
