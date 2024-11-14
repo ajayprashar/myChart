@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { PATIENT_TABS, type TabId } from '../../constants/tabs';
-  import type { LoadingState } from '../../types/fhir';
   import { loadingStore, errorStore } from '../../stores/patient.store';
   import { SMART_AUTH_URL, CLIENT_ID, FHIR_BASE_URL } from '../../config';
+  import LoadingSpinner from '../common/LoadingSpinner.svelte';
 
   export let activeTab: TabId;
   const dispatch = createEventDispatcher<{ tabChange: TabId }>();
@@ -29,39 +29,45 @@
   }
 
   async function handleLogout() {
-    // Clear all storage except for the new code verifier we're about to generate
-    sessionStorage.clear();
-    localStorage.clear();
-    
-    // Clear any cookies
-    document.cookie.split(";").forEach(function(c) { 
-      document.cookie = c.replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-    });
+    try {
+      // Clear all storage except for the new code verifier we're about to generate
+      sessionStorage.clear();
+      localStorage.clear();
+      
+      // Clear cookies
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
 
-    // Generate new PKCE values
-    const { codeVerifier, codeChallenge } = await generatePKCE();
-    
-    // Store the new code verifier
-    sessionStorage.setItem('code_verifier', codeVerifier);
+      // Generate new PKCE values
+      const { codeVerifier, codeChallenge } = await generatePKCE();
+      
+      // Store the new code verifier
+      sessionStorage.setItem('code_verifier', codeVerifier);
 
-    // Redirect to login with fresh parameters
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: CLIENT_ID,
-      scope: 'openid fhirUser launch/patient',
-      redirect_uri: window.location.origin,
-      state: crypto.randomUUID(),
-      aud: FHIR_BASE_URL,
-      code_challenge: codeChallenge,
-      code_challenge_method: 'S256'
-    });
+      // Redirect to login with fresh parameters
+      const params = new URLSearchParams({
+        response_type: 'code',
+        client_id: CLIENT_ID,
+        scope: 'openid fhirUser launch/patient',
+        redirect_uri: window.location.origin,
+        state: crypto.randomUUID(),
+        aud: FHIR_BASE_URL,
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256'
+      });
 
-    // Force reload to Epic login
-    window.location.href = `${SMART_AUTH_URL}?${params}`;
+      // Force reload to Epic login
+      window.location.href = `${SMART_AUTH_URL}?${params}`;
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Fallback to simple redirect if something goes wrong
+      window.location.href = '/';
+    }
   }
 
-  function handleTabClick(tabId: TabId) {
+  function handleTabClick(tabId: TabId): void {
     errorStore.update(errors => ({ ...errors, [tabId]: null }));
     activeTab = tabId;
     dispatch('tabChange', tabId);
@@ -87,7 +93,7 @@
           <span class="sr-only">{description}</span>
           <span>{label}</span>
           {#if $loadingStore[id]}
-            <slot name="loading-spinner" />
+            <LoadingSpinner size="sm" />
           {/if}
         </button>
       {/each}
